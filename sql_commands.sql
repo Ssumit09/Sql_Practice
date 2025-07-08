@@ -104,6 +104,115 @@ WHERE Salary = (
     )
 );
 
+-- practice
+
+create table Orders(
+OrderID int primary key,
+CustomerId int,
+OrderDate date,
+Amount int
+); 
+
+create table Customers(
+CustomerID int primary key,
+Name varchar(50),
+City varchar(50)
+); 
+
+INSERT INTO Orders (OrderID, CustomerID, OrderDate, Amount) VALUES
+  (1, 101, '2023-01-10', 500),
+  (2, 102, '2023-01-11', 1500),
+  (3, 101, '2023-01-12', 700),
+  (4, 103, '2023-01-15', 300),
+  (5, 102, '2023-01-17', 1000);
+
+INSERT INTO Customers (CustomerID, Name, City) VALUES
+  (101, 'Alice', 'Mumbai'),
+  (102, 'Bob', 'Delhi'),
+  (103, 'Charlie', 'Bangalore'),
+  (104, 'David', 'Mumbai');
+
+--  Q1. Get the names of customers who have placed more than 1 order.
+select C.Name 
+from Customers C 
+join Orders O on C.CustomerID=O.CustomerID
+group by C.CustomerID, C.Name
+Having Count(O.OrderId)>1;
+
+ --  Q2. List all customers who have not placed any order.
+select C.Name 
+from Customers C
+left join Orders O on C.CustomerID=O.CustomerID
+group by C.CustomerID, C.Name
+Having Count(O.OrderId)=0;    -- correct but we can reduce it
+
+---
+SELECT C.Name 
+FROM Customers C
+LEFT JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE O.OrderID IS NULL;
+
+ 
+ -- Q3. Display total amount spent by each customer, sorted from highest to lowest.
+SELECT C.Name, SUM(O.Amount) AS TotalSpent
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerID, C.Name
+ORDER BY TotalSpent desc;
+
+--  Q4. Retrieve customers and their order details using a JOIN.
+Select C.CustomerID, C.Name, O.OrderID, O.OrderDate, O.Amount
+from Customers C
+join Orders O on C.CustomerID = O.CustomerID
+
+
+ -- Q5. Find the total number of orders and total amount spent by customers from Delhi.
+ Select count(O.OrderId) as TotalNoOfOrders, sum(O.Amount) as totalAmount
+ from Customers C
+ join Orders O on C.CustomerID = O.CustomerID
+ where C.City='Delhi';
+ 
+ --  Q6. Display customers who placed at least one order above ₹1000.
+ SELECT DISTINCT C.Name 
+FROM Customers C 
+JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE O.Amount > 1000;
+ 
+ -- Q7. List the top 2 customers who spent the most total amount (use subquery, no window functions).
+ SELECT C.Name, SUM(O.Amount) AS TotalSpent
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+GROUP BY C.CustomerID, C.Name
+ORDER BY TotalSpent DESC
+LIMIT 2;
+
+ 
+ -- 🔹 Q8. Add a column called SpendingLevel:
+Select O.OrderID, C.CustomerID, O.Amount,
+case
+	when Amount>1000 then 'High'
+    when Amount>500 AND Amount<1000 then 'medium'
+    else 'low'
+end as SpendingLevel
+FROM Orders O 
+JOIN Customers C ON C.CustomerID = O.CustomerID
+
+-- 🔹 Q9. Find the average order amount for each city
+
+SELECT C.City, AVG(O.Amount) AS AvgAmount
+FROM Orders O 
+JOIN Customers C ON C.CustomerID = O.CustomerID
+GROUP BY C.City;
+
+
+ -- Q10. Find the customers who placed an order on the earliest date in the dataset. 
+ SELECT DISTINCT C.Name
+FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE O.OrderDate = (
+    SELECT MIN(OrderDate)
+    FROM Orders
+);
 
 
 
